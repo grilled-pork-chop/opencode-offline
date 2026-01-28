@@ -1,0 +1,19 @@
+{
+  "name": "opencode-offline-deps",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@gitlab/opencode-gitlab-auth": "^1.3.2",
+    "@openauthjs/openauth": "^0.4.3",
+    "@opencode-ai/plugin": "^1.1.39",
+    "opencode-anthropic-auth": "^0.0.13"
+  }
+}
