@@ -1,0 +1,174 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  
+  "model": "local/your-model-name",
+  "small_model": "local/your-model-name",
+  
+  "disabled_providers": [
+    "openai",
+    "anthropic", 
+    "google",
+    "opencode",
+    "openrouter",
+    "groq",
+    "together",
+    "fireworks"
+  ],
+  
+  "provider": {
+    "local": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Local LLM",
+      "options": {
+        "baseURL": "http://127.0.0.1:8000/v1"
+      },
+      "models": {
+        "your-model-name": {
+          "name": "Your Model Display Name",
+          "tools": true,
+          "reasoning": true
+        }
+      }
+    }
+  },
+  
+  "permission": {
+    "edit": "ask",
+    "bash": {
+      "*": "ask",
+      "git status": "allow",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "git branch*": "allow",
+      "git show*": "allow",
+      "git blame*": "allow",
+      "cat *": "allow",
+      "head *": "allow",
+      "tail *": "allow",
+      "ls *": "allow",
+      "find *": "allow",
+      "grep *": "allow",
+      "rg *": "allow",
+      "wc *": "allow",
+      "file *": "allow",
+      "echo *": "allow",
+      "pytest*": "allow",
+      "python -m pytest*": "allow",
+      "npm test*": "allow",
+      "npm run test*": "allow",
+      "npx vitest*": "allow",
+      "cargo test*": "allow",
+      "go test*": "allow",
+      "ruff check*": "allow",
+      "ruff format --check*": "allow",
+      "mypy*": "allow",
+      "pyright*": "allow",
+      "eslint*": "allow",
+      "tsc --noEmit*": "allow"
+    },
+    "webfetch": "deny",
+    "external_directory": "deny"
+  },
+  
+  "agent": {
+    "build": {
+      "mode": "primary",
+      "description": "Primary coding agent with strict plan-diff-verify workflow",
+      "temperature": 0.1,
+      "maxSteps": 25,
+      "permission": {
+        "edit": "ask",
+        "bash": {
+          "*": "ask",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "pytest*": "allow",
+          "npm test*": "allow",
+          "ruff*": "allow",
+          "mypy*": "allow"
+        }
+      }
+    },
+    "plan": {
+      "mode": "primary",
+      "description": "Read-only analysis and planning agent",
+      "temperature": 0.2,
+      "maxSteps": 20,
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "*": "deny",
+          "git status": "allow",
+          "git diff*": "allow",
+          "git log*": "allow",
+          "cat *": "allow",
+          "grep *": "allow",
+          "rg *": "allow",
+          "find *": "allow",
+          "ls *": "allow"
+        }
+      },
+      "tools": {
+        "write": false,
+        "edit": false,
+        "patch": false
+      }
+    },
+    "general": {
+      "mode": "subagent",
+      "description": "General-purpose agent for research and multi-step tasks",
+      "temperature": 0.2,
+      "maxSteps": 20
+    },
+    "explore": {
+      "mode": "subagent",
+      "description": "Fast read-only codebase exploration",
+      "temperature": 0,
+      "maxSteps": 30,
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "*": "deny",
+          "cat *": "allow",
+          "head *": "allow",
+          "tail *": "allow",
+          "ls *": "allow",
+          "find *": "allow",
+          "grep *": "allow",
+          "rg *": "allow",
+          "git log*": "allow",
+          "git show*": "allow"
+        }
+      },
+      "tools": {
+        "write": false,
+        "edit": false
+      }
+    }
+  },
+  
+  "tools": {
+    "read": true,
+    "grep": true,
+    "glob": true,
+    "list": true,
+    "edit": true,
+    "bash": true,
+    "skill": true,
+    "webfetch": false
+  },
+  
+  "lsp": {
+    "python": {
+      "disabled": false,
+      "command": "pyright-langserver",
+      "args": ["--stdio"]
+    },
+    "typescript": {
+      "disabled": false,
+      "command": "typescript-language-server",
+      "args": ["--stdio"]
+    }
+  }
+}
