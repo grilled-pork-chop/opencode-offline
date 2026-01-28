@@ -1,2 +1,9 @@
-node_modules
-bin
+# Build outputs
+opencode-offline.tar.gz
+opencode-offline-bundle/
+
+# Dependencies
+node_modules/
+
+# Binaries
+bin/
