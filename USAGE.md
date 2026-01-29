@@ -20,7 +20,7 @@ The installer will prompt for:
 | `~/.opencode/env.sh`                     | Environment setup    |
 | `~/.config/opencode/opencode.json`       | Main configuration   |
 | `~/.config/opencode/oh-my-opencode.json` | Plugin configuration |
-| `~/.cache/opencode/api.json`             | Models API cache     |
+| `~/.opencode/cache/api.json`             | Models API cache     |
 
 ## Configuration
 
@@ -128,7 +128,7 @@ Verify the environment variable is set:
 
 ```bash
 echo $OPENCODE_MODELS_URL
-# Should show: file:///home/user/.cache/opencode
+# Should show: file:///home/user/.opencode/cache
 ```
 
 ### Plugin not loading

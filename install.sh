@@ -8,7 +8,7 @@ set -euo pipefail
 # Installation paths
 INSTALL_BASE="$HOME/.opencode"
 CONFIG_DIR="$HOME/.config/opencode"
-CACHE_DIR="$HOME/.cache/opencode"
+CACHE_DIR="$HOME/.opencode/cache"
 NODE_VERSION="v22.16.0"
 
 # Default provider settings
@@ -28,10 +28,7 @@ log_warn()  { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 log_step()  { echo -e "${BLUE}[STEP]${NC} $1"; }
 
-# Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# Provider configuration (will be set by configure_provider)
 PROVIDER_URL=""
 MODEL_NAME=""
 
@@ -49,7 +46,6 @@ configure_provider() {
     echo "  • Custom:      http://your-server:port/v1"
     echo ""
     
-    # Provider URL
     read -p "Provider URL [${DEFAULT_PROVIDER_URL}]: " input_url
     PROVIDER_URL="${input_url:-$DEFAULT_PROVIDER_URL}"
     
@@ -60,7 +56,6 @@ configure_provider() {
     echo "  • deepseek-v32         (vLLM/other)"
     echo ""
     
-    # Model name
     read -p "Model name [${DEFAULT_MODEL_NAME}]: " input_model
     MODEL_NAME="${input_model:-$DEFAULT_MODEL_NAME}"
     
@@ -106,7 +101,7 @@ install_opencode() {
 install_dependencies() {
     log_step "Installing npm dependencies..."
     
-    # OpenCode dependencies go to ~/.cache/opencode/node_modules
+    # OpenCode dependencies go to ~/.opencode/cache/node_modules
     if [[ -d "$SCRIPT_DIR/deps/opencode/node_modules" ]]; then
         mkdir -p "$CACHE_DIR"
         cp -r "$SCRIPT_DIR/deps/opencode/node_modules" "$CACHE_DIR/"
@@ -155,14 +150,12 @@ install_config() {
     mkdir -p "$CONFIG_DIR"
     mkdir -p "$CACHE_DIR"
     
-    # Install opencode.json with provider URL and model substituted
     if [[ -f "$SCRIPT_DIR/config/opencode.json" ]]; then
         if [[ -f "$CONFIG_DIR/opencode.json" ]]; then
             log_warn "Backing up existing opencode.json"
             cp "$CONFIG_DIR/opencode.json" "$CONFIG_DIR/opencode.json.bak"
         fi
         
-        # Substitute provider URL and model name
         sed -e "s|__PROVIDER_URL__|${PROVIDER_URL}|g" \
             -e "s|__MODEL_NAME__|${MODEL_NAME}|g" \
             "$SCRIPT_DIR/config/opencode.json" > "$CONFIG_DIR/opencode.json"
@@ -173,14 +166,12 @@ install_config() {
         exit 1
     fi
     
-    # Install oh-my-opencode.json with model substituted
     if [[ -f "$SCRIPT_DIR/config/oh-my-opencode.json" ]]; then
         if [[ -f "$CONFIG_DIR/oh-my-opencode.json" ]]; then
             log_warn "Backing up existing oh-my-opencode.json"
             cp "$CONFIG_DIR/oh-my-opencode.json" "$CONFIG_DIR/oh-my-opencode.json.bak"
         fi
         
-        # Substitute model name
         sed "s|__MODEL_NAME__|${MODEL_NAME}|g" \
             "$SCRIPT_DIR/config/oh-my-opencode.json" > "$CONFIG_DIR/oh-my-opencode.json"
         
@@ -190,7 +181,6 @@ install_config() {
         exit 1
     fi
     
-    # Install models API cache (for OPENCODE_MODELS_URL)
     if [[ -f "$SCRIPT_DIR/config/api.json" ]]; then
         cp "$SCRIPT_DIR/config/api.json" "$CACHE_DIR/"
         log_info "Installed models API cache"
@@ -205,7 +195,6 @@ setup_environment() {
     local shell_rc=""
     local shell_name=""
     
-    # Detect shell
     if [[ -n "${ZSH_VERSION:-}" ]] || [[ "$SHELL" == *"zsh"* ]]; then
         shell_rc="$HOME/.zshrc"
         shell_name="zsh"
@@ -214,18 +203,16 @@ setup_environment() {
         shell_name="bash"
     fi
     
-    # Create env file
     local env_file="$INSTALL_BASE/env.sh"
     cat > "$env_file" << EOF
 # OpenCode Offline Environment
 export PATH="\$HOME/.opencode/bin:\$HOME/.opencode/node/bin:\$PATH"
-export OPENCODE_MODELS_URL="file://\$HOME/.cache/opencode"
-export NODE_PATH="\$HOME/.cache/opencode/node_modules:\$HOME/.config/opencode/node_modules"
+export OPENCODE_MODELS_URL="file://\$HOME/.opencode/cache"
+export NODE_PATH="\$HOME/.opencode/cache/node_modules:\$HOME/.config/opencode/node_modules"
 EOF
     
     log_info "Created environment file: $env_file"
     
-    # Add to shell rc if not already present
     if [[ -n "$shell_rc" ]] && [[ -f "$shell_rc" ]]; then
         local source_line="source \"\$HOME/.opencode/env.sh\""
         if ! grep -qF ".opencode/env.sh" "$shell_rc" 2>/dev/null; then
@@ -238,9 +225,8 @@ EOF
         fi
     fi
     
-    # Source for current session
     export PATH="$INSTALL_BASE/bin:$INSTALL_BASE/node/bin:$PATH"
-    export OPENCODE_MODELS_URL="file://$CACHE_DIR/api.json"
+    export OPENCODE_MODELS_URL="file://$CACHE_DIR"
     export NODE_PATH="$CACHE_DIR/node_modules:$CONFIG_DIR/node_modules"
 }
 
@@ -248,8 +234,7 @@ verify_installation() {
     log_step "Verifying installation..."
     
     local errors=0
-    
-    # Check OpenCode
+
     if [[ -x "$INSTALL_BASE/bin/opencode" ]]; then
         local version=$("$INSTALL_BASE/bin/opencode" --version 2>/dev/null || echo "unknown")
         log_info "OpenCode: $version ✓"
@@ -257,8 +242,7 @@ verify_installation() {
         log_error "OpenCode binary not found"
         ((errors++))
     fi
-    
-    # Check Node.js
+
     if [[ -x "$INSTALL_BASE/node/bin/node" ]]; then
         local node_ver=$("$INSTALL_BASE/node/bin/node" --version 2>/dev/null || echo "unknown")
         log_info "Node.js: $node_ver ✓"
@@ -266,24 +250,21 @@ verify_installation() {
         log_error "Node.js not found"
         ((errors++))
     fi
-    
-    # Check oh-my-opencode in node_modules
+
     if [[ -d "$CONFIG_DIR/node_modules/oh-my-opencode" ]]; then
         log_info "oh-my-opencode module: installed ✓"
     else
         log_error "oh-my-opencode module not found"
         ((errors++))
     fi
-    
-    # Check local plugin loader
+
     if [[ -f "$CONFIG_DIR/plugins/oh-my-opencode-loader.js" ]]; then
         log_info "oh-my-opencode local plugin: installed ✓"
     else
         log_error "oh-my-opencode local plugin not found"
         ((errors++))
     fi
-    
-    # Check config
+
     if [[ -f "$CONFIG_DIR/opencode.json" ]]; then
         log_info "opencode.json: present ✓"
     else
@@ -295,8 +276,7 @@ verify_installation() {
     else
         log_warn "oh-my-opencode.json not found"
     fi
-    
-    # Check models cache
+
     if [[ -f "$CACHE_DIR/api.json" ]]; then
         log_info "Models API cache: present ✓"
     else
@@ -340,9 +320,11 @@ print_summary() {
     echo "  opencode"
     echo ""
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    echo "IMPORTANT: Increase context window for agents to work!"
+    echo "IMPORTANT:"
     echo ""
-    echo "Ensure your provider supports 32k+ context for model: ${MODEL_NAME}"
+    echo "  1. Ensure ${PROVIDER_URL} is running and accessible"
+    echo "  2. Model '${MODEL_NAME}' must be available at that endpoint"
+    echo "  3. Context window should be 32k+ for agents to work properly"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo ""
 }
@@ -354,18 +336,15 @@ main() {
     echo "╚══════════════════════════════════════════════════════════════╝"
     echo ""
 
-    # Configure provider
     configure_provider
-    
-    # Install components
+
     install_node
     install_opencode
     install_dependencies
     install_local_plugin
     install_config
     setup_environment
-    
-    # Verify
+
     if verify_installation; then
         print_summary
     else
