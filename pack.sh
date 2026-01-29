@@ -39,6 +39,8 @@ OH_MY_OPENCODE_DEPS=(
     "oh-my-opencode@latest"
 )
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 cleanup() {
     log_info "Cleaning previous build..."
     rm -rf "$BUNDLE_DIR" "$OUTPUT_ARCHIVE"
@@ -58,7 +60,6 @@ main() {
     echo "╚══════════════════════════════════════════════════════════════╝"
     echo ""
     
-    # Check requirements
     for cmd in curl tar npm; do
         if ! command -v "$cmd" &>/dev/null; then
             log_error "Required command not found: $cmd"
@@ -68,7 +69,6 @@ main() {
     
     cleanup
     
-    # Create directory structure
     log_step "Creating directory structure..."
     mkdir -p "$BUNDLE_DIR"/{bin,node,deps,config}
     
@@ -114,7 +114,7 @@ main() {
 EOF
     
     npm install --no-bin-links --ignore-scripts --no-audit --no-fund \
-        "${OPENCODE_DEPS[@]}" 2>&1 | grep -E '(added|npm warn)' || true
+    "${OPENCODE_DEPS[@]}" 2>&1 | grep -E '(added|npm warn)' || true
     popd > /dev/null
     log_info "OpenCode dependencies installed"
     
@@ -134,7 +134,7 @@ EOF
 EOF
     
     npm install --no-bin-links --ignore-scripts --no-audit --no-fund \
-        "${OH_MY_OPENCODE_DEPS[@]}" 2>&1 | grep -E '(added|npm warn)' || true
+    "${OH_MY_OPENCODE_DEPS[@]}" 2>&1 | grep -E '(added|npm warn)' || true
     popd > /dev/null
     log_info "oh-my-opencode plugin installed"
     
@@ -143,12 +143,9 @@ EOF
     # =========================================================================
     log_step "Generating configuration files..."
     
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    
-    # Copy config templates from templates/ folder
-    if [[ -d "$script_dir/templates" ]]; then
-        cp "$script_dir/templates/opencode.json" "$BUNDLE_DIR/config/"
-        cp "$script_dir/templates/oh-my-opencode.json" "$BUNDLE_DIR/config/"
+    if [[ -d "$SCRIPT_DIR/templates" ]]; then
+        cp "$SCRIPT_DIR/templates/opencode.json" "$BUNDLE_DIR/config/"
+        cp "$SCRIPT_DIR/templates/oh-my-opencode.json" "$BUNDLE_DIR/config/"
         log_info "Copied configuration templates"
     else
         log_error "templates/ folder not found in $script_dir"
@@ -159,35 +156,32 @@ EOF
     # 7. Copy install script
     # =========================================================================
     log_step "Adding install script..."
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     
-    if [[ -f "$script_dir/install.sh" ]]; then
-        cp "$script_dir/install.sh" "$BUNDLE_DIR/"
+    if [[ -f "$SCRIPT_DIR/install.sh" ]]; then
+        cp "$SCRIPT_DIR/install.sh" "$BUNDLE_DIR/"
     else
-        log_error "install.sh not found in $script_dir"
+        log_error "install.sh not found in $SCRIPT_DIR"
         exit 1
     fi
     chmod +x "$BUNDLE_DIR/install.sh"
-
+    
     # =========================================================================
     # 8. Copy usage documentation
     # =========================================================================
     log_step "Adding usage documentation..."
-    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-    if [[ -f "$script_dir/USAGE.md" ]]; then
-        cp "$script_dir/templates/USAGE.md" "$BUNDLE_DIR/README.md"
+    
+    if [[ -f "$SCRIPT_DIR/USAGE.md" ]]; then
+        cp "$SCRIPT_DIR/USAGE.md" "$BUNDLE_DIR/README.md"
         log_info "Added README into the bundle"
     fi
-
+    
     # =========================================================================
-    # 8. Create archive
+    # 9. Create archive
     # =========================================================================
     log_step "Creating archive..."
     tar -czf "$OUTPUT_ARCHIVE" -C "$BUNDLE_DIR" .
     
-    # Cleanup build directory
-    rm -rf "$BUNDLE_DIR"
+    # rm -rf "$BUNDLE_DIR"
     
     local size=$(du -h "$OUTPUT_ARCHIVE" | cut -f1)
     
