@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "autoupdate": false,
+  
+  "provider": {
+    "local": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Local LLM",
+      "options": {
+        "baseURL": "__PROVIDER_URL__"
+      },
+      "models": {
+        "__MODEL_NAME__": {
+          "name": "__MODEL_NAME__"
+        }
+      }
+    }
+  },
+  
+  "model": "local/__MODEL_NAME__"
+}
