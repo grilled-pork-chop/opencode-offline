@@ -168,7 +168,18 @@ EOF
         exit 1
     fi
     chmod +x "$BUNDLE_DIR/install.sh"
-    
+
+    # =========================================================================
+    # 8. Copy usage documentation
+    # =========================================================================
+    log_step "Adding usage documentation..."
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+    if [[ -f "$script_dir/USAGE.md" ]]; then
+        cp "$script_dir/templates/USAGE.md" "$BUNDLE_DIR/README.md"
+        log_info "Added README into the bundle"
+    fi
+
     # =========================================================================
     # 8. Create archive
     # =========================================================================

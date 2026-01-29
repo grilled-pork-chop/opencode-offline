@@ -5,5 +5,7 @@ opencode-offline-bundle/
 # Dependencies
 node_modules/
 
-# Binaries
+# Bundle folders
 bin/
+config/
+node/

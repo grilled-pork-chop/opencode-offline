@@ -1,43 +1,30 @@
 # OpenCode Offline Installer
 
-Fully offline installer for [OpenCode](https://opencode.ai) on Linux x64.
+Offline installation bundle for [OpenCode](https://opencode.ai) + [oh-my-opencode](https://github.com/code-yeongyu/oh-my-opencode) on Linux x64.
 
-## Quick Start
+## Build (requires internet)
 
-**Build** (requires internet):
 ```bash
-cd offline && ./pack.sh
+./pack.sh
 ```
 
-**Install** (offline):
+Creates `opencode-offline.tar.gz`.
+
+## Install (offline)
+
 ```bash
-tar -xzf opencode-offline.tar.gz && ./install.sh
+tar -xzf opencode-offline.tar.gz
+./install.sh
+source ~/.opencode/env.sh
 ```
 
-**Configure** your LLM endpoint:
+The installer prompts for your LLM provider URL and model name.
+
+## Run
+
 ```bash
-nano ~/.config/opencode/opencode.json
+cd your-project
+opencode
 ```
 
-**Run**:
-```bash
-source ~/.bashrc && opencode
-```
-
-## Project Structure
-
-```
-├── offline/
-│   ├── pack.sh          # Creates the bundle
-│   └── install.sh       # Installs on target machine
-├── opencode-config/
-│   ├── opencode.json    # Main configuration
-│   ├── agents/          # 11 agent definitions
-│   └── skills/          # 11 skill definitions
-└── WORKFLOW.md          # Developer workflow guide
-```
-
-## Documentation
-
-- [WORKFLOW.md](WORKFLOW.md) - How to use OpenCode agents
-- [opencode-config/README.md](opencode-config/README.md) - Configuration details
+See the bundle's README for configuration and usage details.
