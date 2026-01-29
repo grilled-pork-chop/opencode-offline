@@ -143,93 +143,17 @@ EOF
     # =========================================================================
     log_step "Generating configuration files..."
     
-    # Generate opencode.json template (provider will be configured at install time)
-    cat > "$BUNDLE_DIR/config/opencode.json" << 'EOF'
-{
-  "$schema": "https://opencode.ai/config.json",
-  "autoupdate": false,
-  
-  "provider": {
-    "local": {
-      "npm": "@ai-sdk/openai-compatible",
-      "name": "Local LLM",
-      "options": {
-        "baseURL": "__PROVIDER_URL__"
-      },
-      "models": {
-        "__MODEL_NAME__": {
-          "name": "__MODEL_NAME__",
-        }
-      }
-    },
-  },
-  
-  "model": "local/__MODEL_NAME__"
-}
-EOF
-    log_info "Generated opencode.json template"
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     
-    # Generate oh-my-opencode.json (agent model overrides)
-    cat > "$BUNDLE_DIR/config/oh-my-opencode.json" << 'EOF'
-{
-  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
-  "agents": {
-    "sisyphus": {
-      "model": "local/__MODEL_NAME__",
-      "temperature": 0.2
-    },
-    "prometheus": {
-      "model": "local/__MODEL_NAME__",
-      "temperature": 0.3
-    },
-    "atlas": {
-      "model": "local/__MODEL_NAME__",
-      "temperature": 0.2
-    },
-    "oracle": {
-      "model": "local/__MODEL_NAME__",
-      "temperature": 0.3
-    },
-    "explore": {
-      "model": "local/__MODEL_NAME__",
-      "temperature": 0.1
-    },
-    "librarian": {
-      "model": "local/__MODEL_NAME__",
-      "temperature": 0.2
-    },
-    "metis": {
-      "model": "local/__MODEL_NAME__",
-      "temperature": 0.3
-    },
-    "momus": {
-      "model": "local/__MODEL_NAME__",
-      "temperature": 0.3
-    }
-  },
-  "categories": {
-    "quick": {
-      "model": "local/__MODEL_NAME__"
-    },
-    "visual-engineering": {
-      "model": "local/__MODEL_NAME__"
-    },
-    "business-logic": {
-      "model": "local/__MODEL_NAME__"
-    }
-  },
-  "disabled_agents": ["multimodal-looker"],
-  "disabled_hooks": [
-    "comment-checker",
-    "auto-update-checker"
-  ],
-  "disabled_skills": [
-    "playwright"
-  ],
-  "disabled_mcps": ["websearch", "context7", "grep_app"],
-}
-EOF
-    log_info "Generated oh-my-opencode.json"
+    # Copy config templates from templates/ folder
+    if [[ -d "$script_dir/templates" ]]; then
+        cp "$script_dir/templates/opencode.json" "$BUNDLE_DIR/config/"
+        cp "$script_dir/templates/oh-my-opencode.json" "$BUNDLE_DIR/config/"
+        log_info "Copied configuration templates"
+    else
+        log_error "templates/ folder not found in $script_dir"
+        exit 1
+    fi
     
     # =========================================================================
     # 7. Copy install script
