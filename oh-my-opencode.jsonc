@@ -1,0 +1,180 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/master/assets/oh-my-opencode.schema.json",
+  
+  // ==========================================================================
+  // AGENT MODEL OVERRIDES
+  // All agents use local Ollama models instead of cloud APIs
+  // ==========================================================================
+  "agents": {
+    // Primary agent - main orchestrator (needs best model)
+    "sisyphus": {
+      "model": "ollama/qwen3-coder:30b",
+      "temperature": 0.2
+    },
+    
+    // Strategic planner with interview mode
+    "prometheus": {
+      "model": "ollama/qwen3-coder:30b",
+      "temperature": 0.3
+    },
+    
+    // Plan executor/orchestrator
+    "atlas": {
+      "model": "ollama/qwen3-coder:30b",
+      "temperature": 0.2
+    },
+    
+    // Architecture/debugging consultation (read-only)
+    "oracle": {
+      "model": "ollama/qwen3:30b",
+      "temperature": 0.3
+    },
+    
+    // Fast codebase exploration (read-only)
+    "explore": {
+      "model": "ollama/qwen3:30b",
+      "temperature": 0.1
+    },
+    
+    // Documentation research - LIMITED offline (no GitHub search)
+    "librarian": {
+      "model": "ollama/qwen3:30b",
+      "temperature": 0.2
+    },
+    
+    // Plan gap analysis
+    "metis": {
+      "model": "ollama/qwen3:30b",
+      "temperature": 0.3
+    },
+    
+    // Plan reviewer/critic
+    "momus": {
+      "model": "ollama/qwen3:30b",
+      "temperature": 0.3
+    },
+    
+    // Visual/multimodal - DISABLED (requires Gemini/GPT-4V)
+    "multimodal-looker": {
+      "model": "ollama/qwen3:30b",
+      "temperature": 0.2
+    }
+  },
+  
+  // ==========================================================================
+  // CATEGORY MODEL OVERRIDES
+  // Categories are used by delegate_task for domain-specific work
+  // ==========================================================================
+  "categories": {
+    // Fast/cheap tasks
+    "quick": {
+      "model": "ollama/qwen3:30b",
+      "temperature": 0.1
+    },
+    
+    // UI/UX frontend work
+    "visual-engineering": {
+      "model": "ollama/qwen3-coder:30b",
+      "temperature": 0.2
+    },
+    
+    // Backend/business logic
+    "business-logic": {
+      "model": "ollama/qwen3-coder:30b",
+      "temperature": 0.2
+    },
+    
+    // Data processing
+    "data-engineering": {
+      "model": "ollama/qwen3-coder:30b",
+      "temperature": 0.1
+    },
+    
+    // Infrastructure/DevOps
+    "infrastructure": {
+      "model": "ollama/qwen3-coder:30b",
+      "temperature": 0.1
+    },
+    
+    // Documentation writing
+    "documentation": {
+      "model": "ollama/qwen3:30b",
+      "temperature": 0.3
+    },
+    
+    // Testing
+    "testing": {
+      "model": "ollama/qwen3-coder:30b",
+      "temperature": 0.1
+    }
+  },
+  
+  // ==========================================================================
+  // DISABLED AGENTS
+  // These agents don't work well offline or need specific cloud models
+  // ==========================================================================
+  "disabled_agents": [
+    // Multimodal requires vision models (Gemini/GPT-4V) - not available locally
+    "multimodal-looker"
+  ],
+  
+  // ==========================================================================
+  // DISABLED HOOKS
+  // Some hooks require internet or may cause issues with local models
+  // ==========================================================================
+  "disabled_hooks": [
+    // Disable if causing issues with local models
+    // "todo-continuation",
+    // "comment-checker"
+  ],
+  
+  // ==========================================================================
+  // DISABLED SKILLS
+  // Skills that require internet access
+  // ==========================================================================
+  "disabled_skills": [
+    // Playwright requires browser automation setup
+    // "playwright"
+  ],
+  
+  // ==========================================================================
+  // MCP SERVERS - ALL DISABLED FOR OFFLINE USE
+  // These require internet access
+  // ==========================================================================
+  "disabled_mcps": [
+    "websearch_exa",
+    "context7",
+    "grep_app"
+  ],
+
+  // ==========================================================================
+  // BACKGROUND AGENTS CONFIGURATION
+  // Limit concurrency for local hardware
+  // ==========================================================================
+  // "background": {
+  //   "concurrency": {
+  //     // Limit concurrent agents to prevent OOM with large models
+  //     "default": 1,
+  //     "ollama": 1
+  //   }
+  // },
+  
+  // ==========================================================================
+  // TMUX INTEGRATION (Optional)
+  // Enable to see background agents in separate panes
+  // ==========================================================================
+  "tmux": {
+    "enabled": false,
+    "layout": "main-vertical"
+  },
+  
+  // ==========================================================================
+  // COMMIT MESSAGE CUSTOMIZATION
+  // ==========================================================================
+  "commit": {
+    // Add footer to commits made by Sisyphus
+    "footer": false,
+    // Add co-author trailer
+    "co_author": false
+  }
+}
