@@ -13,14 +13,13 @@ The installer will prompt for:
 
 ## Installed Files
 
-| Location                                 | Purpose              |
-| ---------------------------------------- | -------------------- |
-| `~/.opencode/bin/opencode`               | OpenCode binary      |
-| `~/.opencode/node/`                      | Node.js runtime      |
-| `~/.opencode/env.sh`                     | Environment setup    |
-| `~/.config/opencode/opencode.json`       | Main configuration   |
-| `~/.config/opencode/oh-my-opencode.json` | Plugin configuration |
-| `~/.opencode/cache/api.json`             | Models API cache     |
+| Location                           | Purpose            |
+| ---------------------------------- | ------------------ |
+| `~/.opencode/bin/opencode`         | OpenCode binary    |
+| `~/.opencode/node/`                | Node.js runtime    |
+| `~/.opencode/env.sh`               | Environment setup  |
+| `~/.config/opencode/opencode.json` | Main configuration |
+| `~/.opencode/cache/api.json`       | Models API cache   |
 
 ## Configuration
 
@@ -47,9 +46,8 @@ Common endpoints:
 
 ### Change Model
 
-Update both config files with your model name:
+Update the config file with your model name:
 - `~/.config/opencode/opencode.json` → `"model": "local/your-model"`
-- `~/.config/opencode/oh-my-opencode.json` → agent model overrides
 
 ## Usage
 
@@ -58,69 +56,76 @@ cd your-project
 opencode
 ```
 
-### Quick Tasks
-
 Just describe what you want:
 
-```bash
+```
 Add a login endpoint
 ```
 
-For autonomous execution, include "ultrawork" or "ulw":
+## Agents
 
-```bash
-/ulw refactor the auth module
+OpenCode includes two **primary agents** and two **subagents**.
+
+### Primary Agents
+
+Switch between primary agents using the `Tab` key.
+
+| Agent     | Purpose                                     | Tools                         |
+| --------- | ------------------------------------------- | ----------------------------- |
+| **Build** | Default agent for development work          | All tools enabled             |
+| **Plan**  | Analysis and planning without modifications | Read-only (edits require ask) |
+
+#### Build Agent
+
+The default agent with full access to file operations and system commands. Use this for:
+- Writing and editing code
+- Running commands
+- Making changes to your codebase
+
+#### Plan Agent
+
+A restricted agent for analysis and planning. Use this when you want the LLM to:
+- Analyze code and architecture
+- Suggest changes without modifying files
+- Create implementation plans before coding
+
+**Tip:** Start complex features in Plan mode to outline your approach, then switch to Build mode for implementation.
+
+### Subagents
+
+Subagents are invoked automatically by primary agents, or manually using `@agent_name`.
+
+| Agent       | Purpose                       | Tools                     |
+| ----------- | ----------------------------- | ------------------------- |
+| **General** | Research and multi-step tasks | Full access (except todo) |
+| **Explore** | Fast codebase exploration     | Read-only                 |
+
+#### General Agent
+
+A general-purpose agent for researching complex questions and executing multi-step tasks. Can modify files when needed.
+
+```
+@general investigate why the auth tests are failing
 ```
 
-### Agents
+#### Explore Agent
 
-oh-my-opencode provides specialized agents:
+A fast, read-only agent for exploring codebases. Cannot modify files. Use this to:
+- Find files by patterns
+- Search code for keywords
+- Answer questions about the codebase structure
 
-| Agent          | Purpose                                     |
-| -------------- | ------------------------------------------- |
-| **Sisyphus**   | Default orchestrator, handles complex tasks |
-| **Prometheus** | Strategic planner with interview mode       |
-| **Atlas**      | Plan executor                               |
-| **Oracle**     | Architecture review (read-only)             |
-| **Explore**    | Fast codebase search                        |
-
-Invoke directly: `@oracle review this architecture`
-
-### Planning Workflow
-
-For complex features:
-
-```bash
-@plan build user authentication
+```
+@explore find all API endpoints in this project
 ```
 
-Prometheus will interview you, then create a plan in `.sisyphus/plans/`.
+### Navigation
 
-Execute the plan:
-
-```bash
-/start-work
-```
-
-### Commands
-
-| Command              | Description                     |
-| -------------------- | ------------------------------- |
-| `/start-work`        | Execute a Prometheus plan       |
-| `/ralph-loop "task"` | Self-continuing loop until done |
-| `/refactor`          | Intelligent refactoring         |
+- `Tab` — Switch between primary agents (Build/Plan)
+- `Leader+Right` — Navigate to child session
+- `Leader+Left` — Navigate to parent session
 
 ## Troubleshooting
-
-### Context window too small
-
-Increase context for your model. For Ollama:
-
-```bash
-ollama run your-model
->>> /set parameter num_ctx 32768
->>> /save your-model
-```
 
 ### Startup freeze
 
@@ -131,15 +136,7 @@ echo $OPENCODE_MODELS_URL
 # Should show: file:///home/user/.opencode/cache
 ```
 
-### Plugin not loading
-
-Check node_modules exists:
-
-```bash
-ls ~/.config/opencode/node_modules/oh-my-opencode
-```
-
 ## More Information
 
-- [oh-my-opencode documentation](https://github.com/code-yeongyu/oh-my-opencode)
 - [OpenCode documentation](https://opencode.ai)
+- [Agents documentation](https://opencode.ai/docs/agents/)

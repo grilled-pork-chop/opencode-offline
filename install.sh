@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
-# OpenCode Offline Installer with oh-my-opencode
-# Installs OpenCode, Node.js, oh-my-opencode plugin from pre-packaged bundle
+# OpenCode Offline Installer
+# Installs OpenCode and Node.js from pre-packaged bundle
 #
 set -euo pipefail
 
@@ -109,39 +109,6 @@ install_dependencies() {
         log_info "OpenCode dependencies installed to $CACHE_DIR/node_modules"
     fi
     
-    # oh-my-opencode plugin goes to ~/.config/opencode/node_modules
-    # This is where OpenCode looks for plugin dependencies
-    if [[ -d "$SCRIPT_DIR/deps/plugin/node_modules" ]]; then
-        mkdir -p "$CONFIG_DIR"
-        cp -r "$SCRIPT_DIR/deps/plugin/node_modules" "$CONFIG_DIR/"
-        cp "$SCRIPT_DIR/deps/plugin/package.json" "$CONFIG_DIR/"
-        log_info "oh-my-opencode dependencies installed to $CONFIG_DIR/node_modules"
-    fi
-}
-
-install_local_plugin() {
-    log_step "Installing oh-my-opencode as local plugin..."
-    
-    # Create plugins directory for local plugins
-    mkdir -p "$CONFIG_DIR/plugins"
-    
-    # Create a local plugin wrapper that imports from node_modules
-    # This avoids the BunInstallFailedError because local plugins are loaded directly
-    cat > "$CONFIG_DIR/plugins/oh-my-opencode-loader.js" << 'PLUGIN_EOF'
-// oh-my-opencode local loader for offline use
-// This wrapper loads oh-my-opencode from pre-installed node_modules
-// avoiding the BunInstallFailedError in offline environments
-
-import OhMyOpenCode from "oh-my-opencode";
-
-// Re-export the plugin
-export default OhMyOpenCode;
-
-// Also export named exports if any
-export * from "oh-my-opencode";
-PLUGIN_EOF
-    
-    log_info "Created local plugin loader at $CONFIG_DIR/plugins/oh-my-opencode-loader.js"
 }
 
 install_config() {
@@ -165,22 +132,7 @@ install_config() {
         log_error "opencode.json not found in bundle!"
         exit 1
     fi
-    
-    if [[ -f "$SCRIPT_DIR/config/oh-my-opencode.json" ]]; then
-        if [[ -f "$CONFIG_DIR/oh-my-opencode.json" ]]; then
-            log_warn "Backing up existing oh-my-opencode.json"
-            cp "$CONFIG_DIR/oh-my-opencode.json" "$CONFIG_DIR/oh-my-opencode.json.bak"
-        fi
-        
-        sed "s|__MODEL_NAME__|${MODEL_NAME}|g" \
-            "$SCRIPT_DIR/config/oh-my-opencode.json" > "$CONFIG_DIR/oh-my-opencode.json"
-        
-        log_info "Installed oh-my-opencode.json"
-    else
-        log_error "oh-my-opencode.json not found in bundle!"
-        exit 1
-    fi
-    
+
     if [[ -f "$SCRIPT_DIR/config/api.json" ]]; then
         cp "$SCRIPT_DIR/config/api.json" "$CACHE_DIR/"
         log_info "Installed models API cache"
@@ -251,30 +203,10 @@ verify_installation() {
         ((errors++))
     fi
 
-    if [[ -d "$CONFIG_DIR/node_modules/oh-my-opencode" ]]; then
-        log_info "oh-my-opencode module: installed ✓"
-    else
-        log_error "oh-my-opencode module not found"
-        ((errors++))
-    fi
-
-    if [[ -f "$CONFIG_DIR/plugins/oh-my-opencode-loader.js" ]]; then
-        log_info "oh-my-opencode local plugin: installed ✓"
-    else
-        log_error "oh-my-opencode local plugin not found"
-        ((errors++))
-    fi
-
     if [[ -f "$CONFIG_DIR/opencode.json" ]]; then
         log_info "opencode.json: present ✓"
     else
         log_warn "opencode.json not found"
-    fi
-    
-    if [[ -f "$CONFIG_DIR/oh-my-opencode.json" ]]; then
-        log_info "oh-my-opencode.json: present ✓"
-    else
-        log_warn "oh-my-opencode.json not found"
     fi
 
     if [[ -f "$CACHE_DIR/api.json" ]]; then
@@ -305,13 +237,10 @@ print_summary() {
     echo "Installed components:"
     echo "  • OpenCode (Linux x64)"
     echo "  • Node.js ${NODE_VERSION}"
-    echo "  • oh-my-opencode (as local plugin)"
     echo "  • @ai-sdk/openai-compatible (local provider)"
     echo ""
     echo "Configuration:"
     echo "  • opencode.json (local)"
-    echo "  • oh-my-opencode.json (agent model overrides, disabled MCPs)"
-    echo "  • plugins/oh-my-opencode-loader.js (local plugin loader)"
     echo ""
     echo "To activate in current shell:"
     echo "  source ~/.opencode/env.sh"
@@ -332,7 +261,7 @@ print_summary() {
 main() {
     echo ""
     echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║     OpenCode Offline Installer (with oh-my-opencode)         ║"
+    echo "║                OpenCode Offline Installer                    ║"
     echo "╚══════════════════════════════════════════════════════════════╝"
     echo ""
 
@@ -341,7 +270,6 @@ main() {
     install_node
     install_opencode
     install_dependencies
-    install_local_plugin
     install_config
     setup_environment
 

@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 #
-# OpenCode Offline Packager with oh-my-opencode
-# Downloads opencode, Node.js, oh-my-opencode plugin, and dependencies
-# For offline installation (Linux x64 only)
+# OpenCode Offline Packager
+# Downloads OpenCode, Node.js, and dependencies for offline installation (Linux x64 only)
 #
 set -euo pipefail
 
@@ -34,11 +33,6 @@ OPENCODE_DEPS=(
     "@opencode-ai/plugin@latest"
 )
 
-# oh-my-opencode plugin
-OH_MY_OPENCODE_DEPS=(
-    "oh-my-opencode@latest"
-)
-
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 cleanup() {
@@ -56,7 +50,7 @@ download_file() {
 main() {
     echo ""
     echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║     OpenCode Offline Packager (with oh-my-opencode)          ║"
+    echo "║                 OpenCode Offline Packager                    ║"
     echo "╚══════════════════════════════════════════════════════════════╝"
     echo ""
     
@@ -117,35 +111,14 @@ EOF
     "${OPENCODE_DEPS[@]}" 2>&1 | grep -E '(added|npm warn)' || true
     popd > /dev/null
     log_info "OpenCode dependencies installed"
-    
+
     # =========================================================================
-    # 5. Install oh-my-opencode plugin
-    # =========================================================================
-    log_step "Installing oh-my-opencode plugin..."
-    mkdir -p "$BUNDLE_DIR/deps/plugin"
-    pushd "$BUNDLE_DIR/deps/plugin" > /dev/null
-    
-    cat > package.json << 'EOF'
-{
-  "name": "opencode-plugin",
-  "private": true,
-  "dependencies": {}
-}
-EOF
-    
-    npm install --no-bin-links --ignore-scripts --no-audit --no-fund \
-    "${OH_MY_OPENCODE_DEPS[@]}" 2>&1 | grep -E '(added|npm warn)' || true
-    popd > /dev/null
-    log_info "oh-my-opencode plugin installed"
-    
-    # =========================================================================
-    # 6. Generate configuration files
+    # 5. Generate configuration files
     # =========================================================================
     log_step "Generating configuration files..."
     
     if [[ -d "$SCRIPT_DIR/templates" ]]; then
         cp "$SCRIPT_DIR/templates/opencode.json" "$BUNDLE_DIR/config/"
-        cp "$SCRIPT_DIR/templates/oh-my-opencode.json" "$BUNDLE_DIR/config/"
         log_info "Copied configuration templates"
     else
         log_error "templates/ folder not found in $script_dir"
@@ -153,7 +126,7 @@ EOF
     fi
     
     # =========================================================================
-    # 7. Copy install script
+    # 6. Copy install script
     # =========================================================================
     log_step "Adding install script..."
     
@@ -166,7 +139,7 @@ EOF
     chmod +x "$BUNDLE_DIR/install.sh"
     
     # =========================================================================
-    # 8. Copy usage documentation
+    # 7. Copy usage documentation
     # =========================================================================
     log_step "Adding usage documentation..."
     
@@ -176,12 +149,12 @@ EOF
     fi
     
     # =========================================================================
-    # 9. Create archive
+    # 8. Create archive
     # =========================================================================
     log_step "Creating archive..."
     tar -czf "$OUTPUT_ARCHIVE" -C "$BUNDLE_DIR" .
     
-    # rm -rf "$BUNDLE_DIR"
+    rm -rf "$BUNDLE_DIR"
     
     local size=$(du -h "$OUTPUT_ARCHIVE" | cut -f1)
     
@@ -195,9 +168,8 @@ EOF
     echo "Contents:"
     echo "  • OpenCode binary (Linux x64)"
     echo "  • Node.js ${NODE_VERSION}"
-    echo "  • oh-my-opencode plugin"
     echo "  • @ai-sdk/openai-compatible"
-    echo "  • Configuration files (offline agents)"
+    echo "  • Configuration files"
     echo "  • models.dev API cache"
     echo ""
     echo "To install on target machine:"

@@ -1,6 +1,6 @@
 # OpenCode Offline Installer
 
-Offline installation bundle for [OpenCode](https://opencode.ai) + [oh-my-opencode](https://github.com/code-yeongyu/oh-my-opencode) on Linux x64.
+Offline installation bundle for [OpenCode](https://opencode.ai) on Linux x64.
 
 ## Build (requires internet)
 
