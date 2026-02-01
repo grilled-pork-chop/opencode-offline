@@ -166,7 +166,9 @@ EOF
         fi
     fi
 
-    export PATH="$INSTALL_BASE/bin:$INSTALL_BASE/node/bin:$PATH"
+    # Source for current session
+    source "$ENV_FILE"
+    log_ok "Environment loaded"
 
     # ── Verify ───────────────────────────────────────────────────────────
     log_step "Verifying"
@@ -211,14 +213,11 @@ EOF
     echo "    URL:   ${PROVIDER_URL}"
     echo "    Model: ${MODEL_NAME}"
     echo ""
-    echo "  To activate in current shell:"
-    echo "    source ~/.opencode/env.sh"
-    echo ""
     echo "  Then run:"
     echo "    opencode"
     echo ""
     echo "  Later:"
-    echo "    opencode-offline config      Change provider/model"
+    echo "    opencode-offline config       Change provider/model"
     echo "    opencode-offline status       Show current config"
     echo ""
     echo "  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -339,8 +338,9 @@ cmd_uninstall() {
     rm -rf "$INSTALL_BASE" "$CONFIG_DIR"
 
     for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
-        if [[ -f "$rc" ]]; then
+        if [[ -f "$rc" ]] && grep -qF ".opencode/env.sh" "$rc" 2>/dev/null; then
             sed -i '/# OpenCode Offline/d; /\.opencode\/env\.sh/d' "$rc"
+            log_ok "Cleaned $rc"
         fi
     done
 
