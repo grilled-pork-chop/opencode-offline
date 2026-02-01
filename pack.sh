@@ -113,35 +113,31 @@ EOF
     log_info "OpenCode dependencies installed"
 
     # =========================================================================
-    # 5. Generate configuration files
+    # 5. Copy configuration template
     # =========================================================================
-    log_step "Generating configuration files..."
+    log_step "Copying configuration template..."
     
     if [[ -d "$SCRIPT_DIR/templates" ]]; then
         cp "$SCRIPT_DIR/templates/opencode.json" "$BUNDLE_DIR/config/"
-        log_info "Copied configuration templates"
+        log_info "Copied configuration template"
     else
-        log_error "templates/ folder not found in $script_dir"
+        log_error "templates/ folder not found in $SCRIPT_DIR"
         exit 1
     fi
     
     # =========================================================================
-    # 6. Copy install script
+    # 6. Copy CLI and documentation
     # =========================================================================
-    log_step "Adding install script..."
+    log_step "Adding CLI and documentation..."
     
-    if [[ -f "$SCRIPT_DIR/install.sh" ]]; then
-        cp "$SCRIPT_DIR/install.sh" "$BUNDLE_DIR/"
+    if [[ -f "$SCRIPT_DIR/opencode-offline" ]]; then
+        cp "$SCRIPT_DIR/opencode-offline" "$BUNDLE_DIR/"
+        chmod +x "$BUNDLE_DIR/opencode-offline"
+        log_info "Added opencode-offline CLI"
     else
-        log_error "install.sh not found in $SCRIPT_DIR"
+        log_error "opencode-offline not found in $SCRIPT_DIR"
         exit 1
     fi
-    chmod +x "$BUNDLE_DIR/install.sh"
-    
-    # =========================================================================
-    # 7. Copy usage documentation
-    # =========================================================================
-    log_step "Adding usage documentation..."
     
     if [[ -f "$SCRIPT_DIR/USAGE.md" ]]; then
         cp "$SCRIPT_DIR/USAGE.md" "$BUNDLE_DIR/README.md"
@@ -149,7 +145,7 @@ EOF
     fi
     
     # =========================================================================
-    # 8. Create archive
+    # 7. Create archive
     # =========================================================================
     log_step "Creating archive..."
     tar -czf "$OUTPUT_ARCHIVE" -C "$BUNDLE_DIR" .
@@ -169,13 +165,13 @@ EOF
     echo "  • OpenCode binary (Linux x64)"
     echo "  • Node.js ${NODE_VERSION}"
     echo "  • @ai-sdk/openai-compatible"
-    echo "  • Configuration files"
+    echo "  • Configuration template"
     echo "  • models.dev API cache"
     echo ""
     echo "To install on target machine:"
     echo "  1. Copy $OUTPUT_ARCHIVE to target"
     echo "  2. tar -xzf $OUTPUT_ARCHIVE"
-    echo "  3. ./install.sh"
+    echo "  3. ./opencode-offline install"
     echo ""
 }
 

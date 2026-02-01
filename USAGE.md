@@ -3,7 +3,7 @@
 ## Install
 
 ```bash
-./install.sh
+./opencode-offline install
 source ~/.opencode/env.sh
 ```
 
@@ -11,43 +11,26 @@ The installer will prompt for:
 - **Provider URL**: Your LLM endpoint (e.g., `http://localhost:8000/v1`)
 - **Model name**: The model to use (e.g., `deepseek-v32`)
 
-## Installed Files
+## Management
 
-| Location                           | Purpose            |
-| ---------------------------------- | ------------------ |
-| `~/.opencode/bin/opencode`         | OpenCode binary    |
-| `~/.opencode/node/`                | Node.js runtime    |
-| `~/.opencode/env.sh`               | Environment setup  |
-| `~/.config/opencode/opencode.json` | Main configuration |
-| `~/.opencode/cache/api.json`       | Models API cache   |
+After installation, the `opencode-offline` CLI is available on PATH:
 
-## Configuration
-
-### Change Provider
-
-Edit `~/.config/opencode/opencode.json`:
-
-```json
-{
-  "provider": {
-    "local": {
-      "options": {
-        "baseURL": "http://localhost:8000/v1"
-      }
-    }
-  }
-}
+```bash
+opencode-offline config       # Change provider URL or model
+opencode-offline status       # Show versions and configuration
+opencode-offline uninstall    # Remove everything
 ```
 
-Common endpoints:
-- vLLM: `http://localhost:8000/v1`
-- Ollama: `http://localhost:11434/v1`
-- LM Studio: `http://localhost:1234/v1`
+## Installed Files
 
-### Change Model
-
-Update the config file with your model name:
-- `~/.config/opencode/opencode.json` → `"model": "local/your-model"`
+| Location                           | Purpose              |
+| ---------------------------------- | -------------------- |
+| `~/.opencode/bin/opencode`         | OpenCode binary      |
+| `~/.opencode/bin/opencode-offline` | Management CLI       |
+| `~/.opencode/node/`                | Node.js runtime      |
+| `~/.opencode/cache/`               | npm deps + API cache |
+| `~/.opencode/env.sh`               | Environment setup    |
+| `~/.config/opencode/opencode.json` | Main configuration   |
 
 ## Usage
 
@@ -129,11 +112,25 @@ A fast, read-only agent for exploring codebases. Cannot modify files. Use this t
 
 ### Startup freeze
 
-Verify the environment variable is set:
+OpenCode hangs if it can't reach `models.dev`. Verify the environment:
 
 ```bash
 echo $OPENCODE_MODELS_URL
-# Should show: file:///home/user/.opencode/cache
+# Should show: file:///home//.opencode/cache
+```
+
+If not set, run `source ~/.opencode/env.sh`.
+
+### Wrong provider or model
+
+```bash
+opencode-offline config
+```
+
+### Permission denied
+
+```bash
+chmod +x ~/.opencode/bin/opencode ~/.opencode/bin/opencode-offline
 ```
 
 ## More Information
