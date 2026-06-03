@@ -4,16 +4,22 @@ Offline installation toolkit for [OpenCode](https://opencode.ai) on Linux x64 wi
 
 ## Overview
 
-OpenCode is a terminal-based AI coding assistant. By default it requires internet access to download models metadata, npm dependencies, and the binary itself. This project packages everything needed for fully air-gapped deployment.
+OpenCode is a terminal-based AI coding assistant. On first run it installs `@opencode-ai/plugin` (a package whose version is locked to the binary) from npm — which fails on an air-gapped machine. This project packages the binary together with the matching, pre-built plugin so nothing needs to be fetched at runtime.
 
 **What's included:**
 
-- OpenCode binary (Linux x64)
-- Node.js runtime (v22.16.0)
-- `@ai-sdk/openai-compatible` provider
-- Models API cache (prevents startup freeze)
+- OpenCode binary (Linux x64), pinned to a specific version
+- `@opencode-ai/plugin`, **pre-built and version-matched to the binary**
 - Configuration template with placeholder substitution
 - `opencode-offline` CLI for install, config, status, and uninstall
+
+The OpenAI-compatible provider SDK is bundled inside the OpenCode binary, and Node.js is not required (the binary is self-contained), so neither is packaged separately.
+
+### Version coupling
+
+`@opencode-ai/plugin` **must** match the OpenCode binary version exactly. Both are driven
+by a single `OPENCODE_VERSION` variable at the top of `pack.sh` — bump it and re-run
+`./pack.sh` to build a bundle for a new version.
 
 ## Project Structure
 
@@ -35,7 +41,9 @@ opencode-offline/
 ./pack.sh
 ```
 
-This downloads all components and creates `opencode-offline.tar.gz`.
+This downloads the pinned binary, pre-builds the matching plugin, and creates
+`opencode-offline.tar.gz`. To target a different version, edit `OPENCODE_VERSION` at the
+top of `pack.sh` first.
 
 **Requirements:** `curl`, `tar`, `npm`
 
@@ -67,11 +75,11 @@ After installation, `opencode-offline` is available on PATH:
 
 ## Installed Files
 
-| Location                           | Purpose              |
-| ---------------------------------- | -------------------- |
-| `~/.opencode/bin/opencode`         | OpenCode binary      |
-| `~/.opencode/bin/opencode-offline` | Management CLI       |
-| `~/.opencode/node/`                | Node.js runtime      |
-| `~/.opencode/cache/`               | npm deps + API cache |
-| `~/.opencode/env.sh`               | Environment setup    |
-| `~/.config/opencode/opencode.json` | Main configuration   |
+| Location                                | Purpose                          |
+| --------------------------------------- | -------------------------------- |
+| `~/.opencode/bin/opencode`              | OpenCode binary                  |
+| `~/.opencode/bin/opencode-offline`      | Management CLI                   |
+| `~/.opencode/{node_modules,package.json,package-lock.json}` | Plugin (install root) |
+| `~/.opencode/env.sh`                    | Environment setup                |
+| `~/.config/opencode/opencode.json`      | Main configuration               |
+| `~/.config/opencode/{node_modules,package.json,package-lock.json}` | Plugin (config dir) |

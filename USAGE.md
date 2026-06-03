@@ -9,7 +9,7 @@ source ~/.opencode/env.sh
 
 The installer will prompt for:
 - **Provider URL**: Your LLM endpoint (e.g., `http://localhost:8000/v1`)
-- **Model name**: The model to use (e.g., `deepseek-v32`)
+- **Model name**: The model to use (e.g., `GLM-5.1-FP8`)
 
 ## Management
 
@@ -23,14 +23,14 @@ opencode-offline uninstall    # Remove everything
 
 ## Installed Files
 
-| Location                           | Purpose              |
-| ---------------------------------- | -------------------- |
-| `~/.opencode/bin/opencode`         | OpenCode binary      |
-| `~/.opencode/bin/opencode-offline` | Management CLI       |
-| `~/.opencode/node/`                | Node.js runtime      |
-| `~/.opencode/cache/`               | npm deps + API cache |
-| `~/.opencode/env.sh`               | Environment setup    |
-| `~/.config/opencode/opencode.json` | Main configuration   |
+| Location                                                           | Purpose               |
+| ------------------------------------------------------------------ | --------------------- |
+| `~/.opencode/bin/opencode`                                         | OpenCode binary       |
+| `~/.opencode/bin/opencode-offline`                                 | Management CLI        |
+| `~/.opencode/{node_modules,package.json,package-lock.json}`        | Plugin (install root) |
+| `~/.opencode/env.sh`                                               | Environment setup     |
+| `~/.config/opencode/opencode.json`                                 | Main configuration    |
+| `~/.config/opencode/{node_modules,package.json,package-lock.json}` | Plugin (config dir)   |
 
 ## Usage
 
@@ -109,17 +109,6 @@ A fast, read-only agent for exploring codebases. Cannot modify files. Use this t
 - `Leader+Left` — Navigate to parent session
 
 ## Troubleshooting
-
-### Startup freeze
-
-OpenCode hangs if it can't reach `models.dev`. Verify the environment:
-
-```bash
-echo $OPENCODE_MODELS_URL
-# Should show: file:///home//.opencode/cache
-```
-
-If not set, run `source ~/.opencode/env.sh`.
 
 ### Wrong provider or model
 
