@@ -23,14 +23,12 @@ opencode-offline uninstall    # Remove everything
 
 ## Installed Files
 
-| Location                                                           | Purpose               |
-| ------------------------------------------------------------------ | --------------------- |
-| `~/.opencode/bin/opencode`                                         | OpenCode binary       |
-| `~/.opencode/bin/opencode-offline`                                 | Management CLI        |
-| `~/.opencode/{node_modules,package.json,package-lock.json}`        | Plugin (install root) |
-| `~/.opencode/env.sh`                                               | Environment setup     |
-| `~/.config/opencode/opencode.json`                                 | Main configuration    |
-| `~/.config/opencode/{node_modules,package.json,package-lock.json}` | Plugin (config dir)   |
+| Location                            | Purpose            |
+| ----------------------------------- | ------------------ |
+| `~/.opencode/bin/opencode`          | OpenCode binary    |
+| `~/.opencode/bin/opencode-offline`  | Management CLI     |
+| `~/.opencode/env.sh`                | Environment setup  |
+| `~/.config/opencode/opencode.json`  | Main configuration |
 
 ## Usage
 

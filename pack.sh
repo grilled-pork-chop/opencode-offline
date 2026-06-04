@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 #
 # OpenCode Offline Packager
-# Downloads OpenCode and its version-matched plugin for offline installation (Linux x64 only)
+# Downloads OpenCode for offline installation (Linux x64 only)
 #
 set -euo pipefail
 
 # ─── Versions (single source of truth) ───────────────────────────────────────
-# Bump OPENCODE_VERSION to upgrade. The @opencode-ai/plugin version MUST match the
-# binary version exactly — opencode installs it at startup, which fails offline unless
-# the matching, pre-built node_modules is shipped in the bundle.
+# Bump OPENCODE_VERSION to upgrade the pinned binary.
 OPENCODE_VERSION="1.15.13"
 OPENCODE_ASSET="opencode-linux-x64.tar.gz"
 
@@ -53,7 +51,7 @@ main() {
     echo "  OpenCode version: ${OPENCODE_VERSION}"
     echo ""
 
-    for cmd in curl tar npm; do
+    for cmd in curl tar; do
         if ! command -v "$cmd" &>/dev/null; then
             log_error "Required command not found: $cmd"
             exit 1
@@ -63,7 +61,7 @@ main() {
     cleanup
 
     log_step "Creating directory structure..."
-    mkdir -p "$BUNDLE_DIR"/{bin,deps,config}
+    mkdir -p "$BUNDLE_DIR"/{bin,config}
 
     # =========================================================================
     # 1. Download OpenCode binary (pinned to OPENCODE_VERSION)
@@ -78,48 +76,7 @@ main() {
     log_info "OpenCode binary ready"
 
     # =========================================================================
-    # 2. Build the version-matched plugin dependency set
-    # =========================================================================
-    # opencode runs an npm install at startup against a package.json in both its install
-    # root (~/.opencode) and the config dir (~/.config/opencode), pinned to
-    # @opencode-ai/plugin@<binary version>. We pre-build the resulting node_modules +
-    # package-lock.json here so that install is a no-op offline. The same set is reused
-    # for both target directories at install time.
-    log_step "Building plugin dependency set (@opencode-ai/plugin@${OPENCODE_VERSION})..."
-    mkdir -p "$BUNDLE_DIR/deps/plugin"
-    pushd "$BUNDLE_DIR/deps/plugin" > /dev/null
-
-    cat > package.json << EOF
-{
-  "dependencies": {
-    "@opencode-ai/plugin": "${OPENCODE_VERSION}"
-  }
-}
-EOF
-
-    # Match what opencode writes into these directories.
-    cat > .gitignore << 'EOF'
-node_modules
-package.json
-package-lock.json
-bun.lock
-.gitignore
-EOF
-
-    # Match what opencode generates (it creates node_modules/.bin); --ignore-scripts is
-    # safe because the native deps ship prebuilt binaries via optionalDependencies.
-    npm install --ignore-scripts --no-audit --no-fund 2>&1 \
-        | grep -E '(added|npm warn)' || true
-    popd > /dev/null
-
-    if [[ ! -d "$BUNDLE_DIR/deps/plugin/node_modules/@opencode-ai/plugin" ]]; then
-        log_error "Plugin install failed — @opencode-ai/plugin@${OPENCODE_VERSION} not found"
-        exit 1
-    fi
-    log_info "Plugin dependency set ready"
-
-    # =========================================================================
-    # 3. Copy configuration template
+    # 2. Copy configuration template
     # =========================================================================
     log_step "Copying configuration template..."
 
@@ -132,7 +89,7 @@ EOF
     fi
 
     # =========================================================================
-    # 4. Copy CLI and documentation
+    # 3. Copy CLI and documentation
     # =========================================================================
     log_step "Adding CLI and documentation..."
 
@@ -151,7 +108,7 @@ EOF
     fi
 
     # =========================================================================
-    # 5. Create archive
+    # 4. Create archive
     # =========================================================================
     log_step "Creating archive..."
     tar -czf "$OUTPUT_ARCHIVE" -C "$BUNDLE_DIR" .
@@ -170,7 +127,6 @@ EOF
     echo ""
     echo "Contents:"
     echo "  • OpenCode binary v${OPENCODE_VERSION} (Linux x64)"
-    echo "  • @opencode-ai/plugin@${OPENCODE_VERSION} (version-matched, pre-built)"
     echo "  • Configuration template"
     echo ""
     echo "To install on target machine:"

@@ -11,7 +11,7 @@
 set -euo pipefail
 
 # ─── Constants ───────────────────────────────────────────────────────────────
-readonly VERSION="2.0.0"
+readonly VERSION="2.1.0"
 readonly INSTALL_BASE="$HOME/.opencode"
 readonly CONFIG_DIR="$HOME/.config/opencode"
 readonly CONFIG_FILE="$CONFIG_DIR/opencode.json"
@@ -67,19 +67,6 @@ prompt_provider() {
     echo ""
 }
 
-# Seed opencode's version-matched plugin deps into a target dir so its startup
-# install becomes a no-op offline. $1 = target dir, $2 = package-lock "name" field.
-seed_deps() {
-    local target="$1" lockname="$2" src="$3"
-    mkdir -p "$target"
-    rm -rf "$target/node_modules"
-    cp -r "$src/node_modules" "$target/"
-    cp "$src/package.json" "$src/package-lock.json" "$src/.gitignore" "$target/"
-    # opencode derives the lockfile name from the directory basename; match it.
-    # Only the first "name" (the top-level project name) — never the dependency names.
-    sed -i "0,/\"name\": \"[^\"]*\"/s//\"name\": \"${lockname}\"/" "$target/package-lock.json"
-}
-
 # =============================================================================
 # INSTALL
 # =============================================================================
@@ -110,19 +97,6 @@ cmd_install() {
     cp "${BASH_SOURCE[0]}" "$INSTALL_BASE/bin/opencode-offline"
     chmod +x "$INSTALL_BASE/bin/opencode-offline"
     log_ok "OpenCode → $INSTALL_BASE/bin"
-
-    # ── Plugin dependencies ──────────────────────────────────────────────
-    # opencode installs @opencode-ai/plugin (version-matched) at startup in both its
-    # install root and the config dir. Seed the pre-built set so that's a no-op offline.
-    log_step "Installing plugin dependencies"
-    if [[ -d "$script_dir/deps/plugin/node_modules/@opencode-ai/plugin" ]]; then
-        seed_deps "$INSTALL_BASE" ".opencode" "$script_dir/deps/plugin"
-        seed_deps "$CONFIG_DIR"   "opencode"  "$script_dir/deps/plugin"
-        log_ok "Plugin → $INSTALL_BASE and $CONFIG_DIR"
-    else
-        log_err "Plugin deps not found in bundle: $script_dir/deps/plugin"
-        exit 1
-    fi
 
     # ── Configuration ────────────────────────────────────────────────────
     log_step "Writing configuration"
@@ -182,20 +156,6 @@ EOF
         ((errors++))
     fi
 
-    if [[ -d "$INSTALL_BASE/node_modules/@opencode-ai/plugin" ]]; then
-        log_ok "Plugin (install root)"
-    else
-        log_err "Plugin missing in $INSTALL_BASE — offline startup will try to install"
-        ((errors++))
-    fi
-
-    if [[ -d "$CONFIG_DIR/node_modules/@opencode-ai/plugin" ]]; then
-        log_ok "Plugin (config dir)"
-    else
-        log_err "Plugin missing in $CONFIG_DIR — offline startup will try to install"
-        ((errors++))
-    fi
-
     [[ -f "$CONFIG_FILE" ]] && log_ok "opencode.json" || log_warn "Config missing"
 
     if (( errors > 0 )); then
@@ -210,7 +170,6 @@ EOF
     echo ""
     echo "  Paths:"
     echo "    Binary:  $INSTALL_BASE/bin/opencode"
-    echo "    Plugin:  $INSTALL_BASE/node_modules/ and $CONFIG_DIR/node_modules/"
     echo "    Config:  $CONFIG_DIR/"
     echo ""
     echo "  Provider:"
@@ -294,12 +253,6 @@ cmd_status() {
         log_err "OpenCode: not installed"
     fi
 
-    if [[ -d "$INSTALL_BASE/node_modules/@opencode-ai/plugin" && -d "$CONFIG_DIR/node_modules/@opencode-ai/plugin" ]]; then
-        log_ok "Plugin: installed (both roots)"
-    else
-        log_err "Plugin: missing — offline startup will try to install"
-    fi
-
     if [[ -f "$CONFIG_FILE" ]]; then
         read_config
         echo ""
@@ -314,7 +267,6 @@ cmd_status() {
     echo ""
     echo "  Paths:"
     echo "    Binary:  $INSTALL_BASE/bin/"
-    echo "    Plugin:  $INSTALL_BASE/node_modules/ + $CONFIG_DIR/node_modules/"
     echo "    Config:  $CONFIG_DIR/"
     echo ""
 }

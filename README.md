@@ -4,22 +4,13 @@ Offline installation toolkit for [OpenCode](https://opencode.ai) on Linux x64 wi
 
 ## Overview
 
-OpenCode is a terminal-based AI coding assistant. On first run it installs `@opencode-ai/plugin` (a package whose version is locked to the binary) from npm — which fails on an air-gapped machine. This project packages the binary together with the matching, pre-built plugin so nothing needs to be fetched at runtime.
+OpenCode is a terminal-based AI coding assistant. The binary is self-contained, but on an air-gapped machine it would otherwise reach the network at startup (auto-update checks, model-list and LSP downloads). This project packages the binary with an offline-friendly configuration so nothing is fetched at runtime.
 
 **What's included:**
 
 - OpenCode binary (Linux x64), pinned to a specific version
-- `@opencode-ai/plugin`, **pre-built and version-matched to the binary**
 - Configuration template with placeholder substitution
 - `opencode-offline` CLI for install, config, status, and uninstall
-
-The OpenAI-compatible provider SDK is bundled inside the OpenCode binary, and Node.js is not required (the binary is self-contained), so neither is packaged separately.
-
-### Version coupling
-
-`@opencode-ai/plugin` **must** match the OpenCode binary version exactly. Both are driven
-by a single `OPENCODE_VERSION` variable at the top of `pack.sh` — bump it and re-run
-`./pack.sh` to build a bundle for a new version.
 
 ## Project Structure
 
@@ -41,11 +32,10 @@ opencode-offline/
 ./pack.sh
 ```
 
-This downloads the pinned binary, pre-builds the matching plugin, and creates
-`opencode-offline.tar.gz`. To target a different version, edit `OPENCODE_VERSION` at the
-top of `pack.sh` first.
+This downloads the pinned binary and creates `opencode-offline.tar.gz`. To target a
+different version, edit `OPENCODE_VERSION` at the top of `pack.sh` first.
 
-**Requirements:** `curl`, `tar`, `npm`
+**Requirements:** `curl`, `tar`
 
 ### 2. Transfer
 
@@ -75,11 +65,9 @@ After installation, `opencode-offline` is available on PATH:
 
 ## Installed Files
 
-| Location                                | Purpose                          |
-| --------------------------------------- | -------------------------------- |
-| `~/.opencode/bin/opencode`              | OpenCode binary                  |
-| `~/.opencode/bin/opencode-offline`      | Management CLI                   |
-| `~/.opencode/{node_modules,package.json,package-lock.json}` | Plugin (install root) |
-| `~/.opencode/env.sh`                    | Environment setup                |
-| `~/.config/opencode/opencode.json`      | Main configuration               |
-| `~/.config/opencode/{node_modules,package.json,package-lock.json}` | Plugin (config dir) |
+| Location                           | Purpose            |
+| ---------------------------------- | ------------------ |
+| `~/.opencode/bin/opencode`         | OpenCode binary    |
+| `~/.opencode/bin/opencode-offline` | Management CLI     |
+| `~/.opencode/env.sh`               | Environment setup  |
+| `~/.config/opencode/opencode.json` | Main configuration |

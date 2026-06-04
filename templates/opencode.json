@@ -1,7 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "autoupdate": false,
-  
   "provider": {
     "local": {
       "npm": "@ai-sdk/openai-compatible",
@@ -16,6 +15,5 @@
       }
     }
   },
-  
   "model": "local/__MODEL_NAME__"
 }
