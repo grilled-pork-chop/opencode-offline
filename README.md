@@ -1,5 +1,7 @@
 # OpenCode Offline
 
+[![CI](https://github.com/grilled-pork-chop/opencode-offline/actions/workflows/ci.yml/badge.svg)](https://github.com/grilled-pork-chop/opencode-offline/actions/workflows/ci.yml)
+
 Offline installation toolkit for [OpenCode](https://opencode.ai) on Linux x64 with any OpenAI-compatible local LLM provider.
 
 ## Overview
@@ -71,3 +73,17 @@ After installation, `opencode-offline` is available on PATH:
 | `~/.opencode/bin/opencode-offline` | Management CLI     |
 | `~/.opencode/env.sh`               | Environment setup  |
 | `~/.config/opencode/opencode.json` | Main configuration |
+
+## Development
+
+```bash
+make lint    # shellcheck the scripts + validate the config JSON
+make pack    # build the bundle (same as ./pack.sh)
+make clean   # remove build outputs
+```
+
+CI (`.github/workflows/ci.yml`) runs the lint on every push and pull request.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

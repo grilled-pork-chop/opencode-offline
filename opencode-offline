@@ -132,6 +132,8 @@ EOF
 
     if [[ -n "$shell_rc" && -f "$shell_rc" ]]; then
         if ! grep -qF ".opencode/env.sh" "$shell_rc" 2>/dev/null; then
+            # $HOME is intentionally left literal — it expands when the rc is sourced.
+            # shellcheck disable=SC2016
             printf '\n# OpenCode Offline\nsource "$HOME/.opencode/env.sh"\n' >> "$shell_rc"
             log_ok "Added to $shell_rc"
         else
@@ -140,6 +142,7 @@ EOF
     fi
 
     # Source for current session
+    # shellcheck disable=SC1090  # runtime path, not resolvable at lint time
     source "$ENV_FILE"
     log_ok "Environment loaded"
 
@@ -156,7 +159,11 @@ EOF
         ((errors++))
     fi
 
-    [[ -f "$CONFIG_FILE" ]] && log_ok "opencode.json" || log_warn "Config missing"
+    if [[ -f "$CONFIG_FILE" ]]; then
+        log_ok "opencode.json"
+    else
+        log_warn "Config missing"
+    fi
 
     if (( errors > 0 )); then
         echo ""

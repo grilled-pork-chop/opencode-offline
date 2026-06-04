@@ -9,3 +9,9 @@ node_modules/
 bin/
 config/
 node/
+
+# Editor / OS / local agent state
+.DS_Store
+*.swp
+*.swo
+.claude/
